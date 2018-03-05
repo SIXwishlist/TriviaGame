@@ -1,50 +1,103 @@
+(function triviaGame() {
+    var questionBank = undefined;
+    var questionIndex = 0;
+    var currentQuestion = undefined;
+    var questionTime = 30;
+    var questionsAnswered = 0;
+    var wrongAnswers = 0;
+    var timeOuts = 0;
+    var timer;
 
-var triviaGame = {
+    var startGame = function () {
+        questionBank = questionArray;
+        questionIndex = 0;
+        questionsAnswered = 0;
+        wrongAnswers = 0;
+        timeOuts = 0;
+        currentQuestion = questionBank[questionIndex];
+        updateQuestion();
+        timer = setInterval(gameInterval, 1000);
+    };
 
-    questionBank : undefined,
-    questionIndex: 0,
-    currentQuestion : undefined,
-    questionTime : 30,
-    questionsAnswered : 0,
-    wrongAnswers : 0,
-    timeOuts : 0,
-    
-    startGame: function(questions) {
-        this.questionBank = questions;
-        this.questionIndex = 0;
-        this.currentQuestion = this.questionBank[this.questionIndex];
-        this.updateQuestion();
-    },
+    var updateQuestion = function () {
+        currentQuestion = questionBank[questionIndex];
+        questionTime = 30;
 
-    updateQuestion : function() {
-        console.log("update question");
-        $(".question").text(this.questionBank[this.questionIndex].question);
+        $(".question").text(questionBank[questionIndex].question);
+        console.log(currentQuestion.answers);
 
-        for (let i = 0; i < this.currentQuestion.answers.length; i++) {
-            $("#answer" + i).text(this.currentQuestion.answers[i]);
+        for (var i = 0; i < currentQuestion.answers.length; i++) {
+            console.log(i);
+            $("#answer" + i).text(currentQuestion.answers[i]);
         }
-    },
+    };
 
-    checkAnswer : function(answerText) {
-        
+    var checkAnswer = function () {
+
+        if ($(this).text() == currentQuestion.answers[currentQuestion.correctAnswer]) {
+            $(".question").text("Correct!");
+            questionsAnswered++;
+            questionIndex++;
+            checkEnd();
+        } else {
+            $(".question").text("Incorrect!");
+            wrongAnswers++;
+            questionIndex++;
+            checkEnd();
+        }
+    };
+
+    var checkEnd = function () {
+        if (questionIndex < questionBank.length) {
+            console.log(questionIndex);
+            updateQuestion();
+        } else {
+            clearInterval(timer);
+            alert("Game over!");
+            $(".question").empty();
+            $(".question").append($("<p> Questions answered correctly: " + questionsAnswered + "</p>"));
+            $(".question").append($("<p> Questions answered incorrectly: " + wrongAnswers + "</p>"));
+            $(".question").append($("<p> Questions not answered in time: " + timeOuts + "</p>"));
+            setTimeout(startGame, 10000);
+        }
+    };
+
+    var question = function (question, answers, correctAnswer) {
+        this.question = question;
+        this.answers = answers;
+        this.correctAnswer = correctAnswer;
+    };
+
+    var gameInterval = function () {
+        questionTime--;
+        $(".time").text("Time Remaining: " + questionTime);
+
+
+        if (questionTime <= 0) {
+            clearInterval(timer);
+            alert("Time's up!");
+            timeOuts++;
+            questionIndex++;
+            if (questionIndex >= questionBank.length) {
+                checkEnd();
+            } else {
+                questionTime = 30;
+                timer = setInterval(gameInterval, 1000);
+                updateQuestion();
+            }
+
+        }
+
     }
 
-}
+    var questionOne = new question("Life, Universe, Everything", ["5", "10", "42", "15"], 2);
+    var questionTwo = new question("best waifu", ["Tifa", "Caulifla", "2B", "None, all waifus are trash"], 3);
+    var questionArray = [questionOne, questionTwo];
 
-var question = function(question, answers, correctAnswer) {
-    this.question = question;
-    this.answers = answers;
-    this.correctAnswer = correctAnswer;
-}
+    $(document).ready(function () {
+        startGame();
 
-var questionOne = new question("Life, Universe, Everything", ["5", "10", "42", "15"], 2);
-var questionArray = [questionOne];
-
-$(document).ready(function() {
-    triviaGame.startGame(questionArray);
-
-    $(".answers").click(function(e) {
-         triviaGame.checkAnswer($(this).text());
+        $(document).on("click", ".answers", checkAnswer);
     });
-});
+})();
 
