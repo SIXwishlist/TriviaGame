@@ -58,6 +58,9 @@
         } else {
             clearInterval(timer); //ends game and then restarts after 10 seconds
             alert("Game over!");
+            for (let i = 0; i < 4; i++) {
+                $("#answer" + i).empty();
+            }
             $(".question").empty();
             $(".question").append($("<p> Questions answered correctly: " + questionsAnswered + "</p>"));
             $(".question").append($("<p> Questions answered incorrectly: " + wrongAnswers + "</p>"));
@@ -81,15 +84,16 @@
 
         if (questionTime <= 0) {
             clearInterval(timer);
-            alert("Time's up!");
+            $(".question").text("Time's up! The correct answer was: " + currentQuestion.answers[currentQuestion.correctAnswer]);
             timeOuts++;
             questionIndex++;
             if (questionIndex >= questionBank.length) {
-                checkEnd();
+                setTimeout(checkEnd, 3000);
             } else {
                 questionTime = 30;
+                setTimeout(updateQuestion, 3000);
                 timer = setInterval(gameInterval, 1000);
-                updateQuestion();
+
             }
 
         }
