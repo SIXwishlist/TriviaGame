@@ -1,15 +1,16 @@
 (function triviaGame() {
-    var questionBank = undefined;
-    var questionIndex = 0;
-    var currentQuestion = undefined;
-    var questionTime = 30;
-    var questionsAnswered = 0;
-    var wrongAnswers = 0;
-    var timeOuts = 0;
-    var timer;
 
+    var questionBank = undefined; //holds the trivia questions as an array of question objects
+    var questionIndex = 0; //tracks current question from array
+    var currentQuestion = undefined; //container for the question being asked
+    var questionTime = 30; //timer for question being asked, reset to 30 each time
+    var questionsAnswered = 0; //tracks correctly guessed questions
+    var wrongAnswers = 0; //tracks questions answered wrongly
+    var timeOuts = 0; //tracks questions not answered before timer end
+    var timer; //holds interval defined later
+
+    //resets game state to default, restarts interval
     var startGame = function () {
-        questionBank = questionArray;
         questionIndex = 0;
         questionsAnswered = 0;
         wrongAnswers = 0;
@@ -19,6 +20,7 @@
         timer = setInterval(gameInterval, 1000);
     };
 
+    //updates HTML with text of current questions and fills p tags with the answer attributes of each question
     var updateQuestion = function () {
         currentQuestion = questionBank[questionIndex];
         questionTime = 30;
@@ -32,27 +34,29 @@
         }
     };
 
+    //checks text of clicked paragraph against text of answer array at the correct index
     var checkAnswer = function () {
 
         if ($(this).text() == currentQuestion.answers[currentQuestion.correctAnswer]) {
             $(".question").text("Correct!");
             questionsAnswered++;
             questionIndex++;
-            checkEnd();
+            setTimeout(checkEnd, 3000);
         } else {
-            $(".question").text("Incorrect!");
+            $(".question").text("Incorrect! The correct answer was: " + currentQuestion.answers[currentQuestion.correctAnswer]);
             wrongAnswers++;
             questionIndex++;
-            checkEnd();
+            setTimeout(checkEnd, 3000);
         }
     };
 
+    //compares number of questions done versus length question bank
     var checkEnd = function () {
-        if (questionIndex < questionBank.length) {
+        if (questionIndex < questionBank.length) { //goes to next question
             console.log(questionIndex);
             updateQuestion();
         } else {
-            clearInterval(timer);
+            clearInterval(timer); //ends game and then restarts after 10 seconds
             alert("Game over!");
             $(".question").empty();
             $(".question").append($("<p> Questions answered correctly: " + questionsAnswered + "</p>"));
@@ -62,12 +66,14 @@
         }
     };
 
+    //object for holding questions to be asked, their answers, and the index of the correct answer in the answer array
     var question = function (question, answers, correctAnswer) {
         this.question = question;
         this.answers = answers;
         this.correctAnswer = correctAnswer;
     };
 
+    //called by the game interval, decrements and update the timer and updates time out count if timer reaches zero    
     var gameInterval = function () {
         questionTime--;
         $(".time").text("Time Remaining: " + questionTime);
@@ -90,9 +96,17 @@
 
     }
 
-    var questionOne = new question("Life, Universe, Everything", ["5", "10", "42", "15"], 2);
-    var questionTwo = new question("best waifu", ["Tifa", "Caulifla", "2B", "None, all waifus are trash"], 3);
-    var questionArray = [questionOne, questionTwo];
+    var questionOne = new question("Stalker, a Russian sci-fi classic, later adapted into a video game, was released in what year?", 
+                    ["1968", "1983", "1979", "2002"], 2);
+    var questionTwo = new question("Which German expressionist film is widely considered one of the first sci-fi pieces produced for the screen?", 
+                    ["The Time Machine", "Star Wars", "Flash Gordon", "Metropolis"], 3);
+    var questionThree = new question("Star Wars' Tattoine scenes were filmed in which North African country?", 
+                    ["Tunisia", "Mali", "Algeria", "Egypt"], 0);
+    var questionFour = new question("Which of the following names belonged to the villain of The Fifth Element?", 
+                    ["Judge Death", "Freiza", "Jean-Baptiste Emmanuel Zorg", "Darth Plagueis"], 2);
+    var questionFive = new question("This entry in the Mad Max series was the first not star Mel Gibson in the titular role", 
+                    ["Mad Max", "Mad Max: Fury Road", "Mad Max: Beyond Thunderdome", "Mad Max 2"], 1);
+    questionBank = [questionOne, questionTwo, questionThree, questionFour, questionFive];
 
     $(document).ready(function () {
         startGame();
